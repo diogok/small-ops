@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'small-setup'
+
+`docker ps | tail -n+2 | awk '{ print $1 }'`.split("\n")
+    .map  { |id| `docker inspect #{id}` }
+    .map  { |inspect| JSON.parse(inspect)[0]}
+    .map  { |data| flatten(data,data["Name"]) }
+    .each { |container| 
+        name = container.keys.first.split("/")[1]
+        port = `docker inspect #{container["/#{name}/id"]} | grep -o '[0-9]\\+/tcp' | head -n1 | grep -o '[0-9]\\+'`.gsub("\n","")
+        hport = container["/#{name}/networksettings/ports/#{port}/tcp/hostport"]
+        container["/#{name}/name"] = name
+        container["/#{name}/port"] = hport
+        container["/#{name}/host"] = @host
+        container["/#{name}/url"] = "http://#{@host}:#{hport}"
+        container.keys.each {|key|
+            if container[key] != nil then
+                puts "#{key} = #{container[key]}"
+                http_put("#{@etcd}/v2/keys#{@prefix}#{key}","value=#{URI.encode(container[key])}")
+            end
+        }
+    }
+

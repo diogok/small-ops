@@ -1,0 +1,5 @@
+test:
+    image: nginx
+    name: "nginx-instance"
+    ports:
+        - "80"

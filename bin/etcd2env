@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'small-setup'
+
+data = http_get("#{@etcd}/v2/keys/#{@prefix}?recursive=true")
+
+final = eflatten( data["node"] )
+final.keys.each {|k|
+  puts "export #{k}=\"#{final[k]}\""
+  puts "export #{k.upcase}=\"#{final[k]}\""
+}
+

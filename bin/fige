@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+require 'small-setup'
+require 'yaml'
+
+yml = YAML.load_file('fig.yml')
+
+env = {
+  'PREFIX'=>@prefix,
+  'HOST'=>@host,
+  'ETCD'=>@etcd
+}
+
+@containers=[]
+
+yml.keys.each {|k|
+
+  if !yml[k].has_key? "name" then
+    yml[k]['name'] = yml[k]['image'].gsub(/[^\/]+\//,'')
+  end
+
+  if !yml[k].has_key? "environment" then
+    yml[k]['environment'] = {}
+  end
+
+  env.keys.each{ |ke|
+    yml[k]['environment'][ke] = env[ke]
+  }
+
+  if @prefix.length >= 1 then
+    yml[k]['name'] = "#{@prefix}_#{yml[k]['name']}"
+  end
+
+  cmd = "docker run -d "
+  cmd << " --name #{yml[k]['name']} "
+
+  if yml[k].has_key? "ports" then
+    yml[k]['ports'].each {|p|
+      cmd << " -p #{p} "
+    }
+  end
+
+  if yml[k].has_key? "links" then
+    yml[k]['links'].each {|l|
+      cmd << " --link #{l} "
+    }
+  end
+
+  if yml[k].has_key? "volumes" then
+    yml[k]['volumes'].each {|v|
+      cmd << " -v #{v} "
+    }
+  end
+
+  if yml[k].has_key? "environment" then
+    yml[k]['environment'].keys.each {|ke|
+      cmd << " -e \"#{ke}=#{yml[k]['environment'][ke].gsub('"','\"')}\" "
+    }
+  end
+
+  cmd << " -t #{yml[k]['image']} "
+
+  if yml[k].has_key? "command" then
+    cmd << " #{yml[k]["command"]}  "
+  end
+
+  cid = `#{cmd}`
+  @containers.push(cid)
+  puts "#{yml[k]['name']} = #{cid}"
+
+}
+
+puts `docker ps`
+
+if @foreground then
+  def stop()
+    @containers.each {|cid|
+      puts `docker stop #{cid}`
+      puts `docker rm #{cid}`
+    }
+    exit
+  end
+  trap('SIGINT') do stop() end
+  trap('SIGTERM') do stop() end
+  while true do
+    sleep 5
+  end
+end
+
