@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+require 'small-setup'
+require 'erb'
+require 'zlib'
+
+if !@input || !@output then
+  raise "Need input and output!"
+end
+
+class Namespace
+  def initialize(data,config)
+    @data=data
+    @config=config
+  end
+
+  def get_binding
+    binding
+  end
+end
+
+
+run = true
+`bash -c '[[ ! -e #{@output} ]] && touch #{@output}'`
+last = File.read(@output)
+
+while run do
+  r = http_get("#{@etcd}/v2/keys/#{@prefix}?recursive=true")
+
+  data = nodes2obj(r["node"]["nodes"],"/")
+
+  template = File.read(@input)
+
+  if @prefix.length >= 1 then prefix = "#{prefix}/" end
+
+  ns = Namespace.new(data,{"host"=>@host,"prefix"=>prefix})
+  result=ERB.new(template).result(ns.get_binding)
+
+  actual = Zlib::crc32(result)
+
+  if actual != last then
+    puts "Writing #{@output}"
+
+    File.open(@output, 'w') { |file| file.write(result) }
+
+    last = actual
+
+    if @cmd then
+      puts `#{@cmd}`
+    end
+  end
+
+  run = false
+
+  if @foreground then
+    sleep 10
+    run = true
+  end
+
+end
+

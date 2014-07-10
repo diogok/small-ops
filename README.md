@@ -44,6 +44,21 @@ Inject the etcd data on the env, as KEY\_SUBKEY=value. Usage:
 
 All args are optional, prefix is prefix key on etcd, etcd is the server.
 
+### etcd2conf
+
+Inspired by [confd](), but again simplified, as it just gets the data from etcd, pass in a specified erb template and write the new conf file, forever on each change (unless told otherwise).
+
+Usage:
+
+    etcd2conf -i nginx.conf.rb -o /etc/nginx/nginx.conf  -c 'nginx -s reload'
+
+Arguments:
+
+    -i Input template file
+    -o Output file
+    -d Run once only [optional]
+    -c 'command' Execute 'command' after writting the config file [optional]
+
 ## License
 
 MIT

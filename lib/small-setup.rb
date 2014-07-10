@@ -17,15 +17,28 @@ OptionParser.new do |opts|
   opts.on("-p", "--prefix prefix", "Set etcd prefix path") do |p|
     options[:prefix] = p
   end
-  opts.on("-d","--daemon","what") do |d|
+  opts.on("-d","--daemon","Run in background") do |d|
     options[:daemon]=d
   end
+  opts.on("-o","--output file","Output file") do |o|
+    options[:output]=o
+  end
+  opts.on("-i","--input file","Input file") do |o|
+    options[:input]=o
+  end
+  opts.on("-c","--command cmd","A command to execute at certain point") do |c|
+    options[:cmd]=c
+  end
 end.parse!
+
 
 @host = options[:host] || ENV['HOST'] || `hostname -I | awk '{ print $1 }'`.gsub("\n","")
 @etcd = options[:etcd] || ENV['ETCD'] || "http://#{@host}:4001"
 @prefix = options[:prefix] || ENV['PREFIX'] || ""
-@foreground = !options[:daemon] || true
+@foreground = !options[:daemon]
+@output = options[:output] || false
+@input = options[:input] || false 
+@cmd = options[:cmd] || false
 
 def http_get(uri)
     JSON.parse(Net::HTTP.get(URI(uri)))
@@ -82,5 +95,17 @@ def eflatten(obj)
     flat[key[1..key.length]]=obj["value"]
   end
   flat
+end
+
+def nodes2obj(nodes,prefix)
+    obj={}
+    nodes.each {|node|
+      if node['dir'] && node['nodes'] then
+        obj[node['key'].gsub(prefix,'')]=nodes2obj( node['nodes'],"#{ node['key'] }/" )
+      elsif node['value'] then
+        obj[node['key'].gsub(prefix,'')]=node['value']
+      end
+    }
+    obj
 end
 
