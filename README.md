@@ -23,6 +23,7 @@ Usage:
     fige # will run the fig.yml containers, block on foreground and stop/rm the containers on ctrl+c/kill
     fige -d # will run the fig.yml containers and exit, leaving them running
     fige --prefix test # will run fig.yml, insert "prefix\_" on the names and the env the prefix on the "env"
+    fige -t name # will run only the one named "name"
 
 ### docker2etcd
 

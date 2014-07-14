@@ -80,6 +80,8 @@ apps.each {|k|
     cmd << " #{yml[k]["command"]}  "
   end
 
+  #`docker pull #{yml[k]['image']}`
+
   cid = `#{cmd}`
   @containers.push(cid)
   puts "#{yml[k]['name']} = #{cid}"
