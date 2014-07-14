@@ -13,7 +13,14 @@ env = {
 
 @containers=[]
 
-yml.keys.each {|k|
+apps=[]
+if @target then
+  apps=yml.keys.select {|k| k == @target}
+else
+    apps=yml.keys
+end
+
+apps.each {|k|
 
   if !yml[k].has_key? "name" then
     yml[k]['name'] = yml[k]['image'].gsub(/[^\/]+\//,'')
@@ -74,6 +81,7 @@ puts `docker ps`
 
 if @foreground then
   def stop()
+    puts "Stopping..."
     @containers.each {|cid|
       puts `docker stop #{cid}`
       puts `docker rm #{cid}`

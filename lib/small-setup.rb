@@ -29,6 +29,9 @@ OptionParser.new do |opts|
   opts.on("-c","--command cmd","A command to execute at certain point") do |c|
     options[:cmd]=c
   end
+  opts.on("-t","--target name","Target a single container") do |t|
+      options[:target]=t
+  end
 end.parse!
 
 
@@ -39,6 +42,7 @@ end.parse!
 @output = options[:output] || false
 @input = options[:input] || false 
 @cmd = options[:cmd] || false
+@target = options[:target] || false
 
 def http_get(uri)
     JSON.parse(Net::HTTP.get(URI(uri)))
