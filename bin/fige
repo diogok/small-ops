@@ -6,10 +6,13 @@ require 'yaml'
 yml = YAML.load_file('fig.yml')
 
 env = {
-  'PREFIX'=>@prefix,
   'HOST'=>@host,
   'ETCD'=>@etcd
 }
+
+if @prefix.length >= 1 then
+    env['PREFIX']=@prefix
+end
 
 @containers=[]
 
