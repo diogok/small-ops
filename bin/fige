@@ -29,7 +29,7 @@ apps.each {|k|
     yml[k]['name'] = yml[k]['image'].gsub(/[^\/]+\//,'')
   end
 
-  json = `docker inspect #{yml[k]['name']}`
+  json = `docker inspect #{yml[k]['name']} 2> /dev/null`
   inspect = JSON.parse(json)
   if inspect && inspect[0] && inspect[0]['State']
       if  inspect[0]["State"]['Running'] then
