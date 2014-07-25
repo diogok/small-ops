@@ -35,6 +35,9 @@ OptionParser.new do |opts|
   opts.on("-u","--as_url","Make url as host/name instead of host:port") do |u|
       options[:as_url]=u
   end
+  opts.on("-v","--verbose","verboser") do |v|
+      options[:verbose]=v
+  end
 end.parse!
 
 
@@ -47,6 +50,7 @@ end.parse!
 @cmd = options[:cmd] || false
 @target = options[:target] || false
 @as_url = options[:as_url] || false
+@verbose = options[:verbose] || false
 
 def http_get(uri)
     JSON.parse(Net::HTTP.get(URI(uri)))

@@ -89,6 +89,10 @@ apps.each {|k|
   @containers.push(cid)
   puts "#{yml[k]['name']} = #{cid}"
 
+  if @cmd then
+      puts `#{@cmd}`
+  end
+
 }
 
 puts `docker ps`

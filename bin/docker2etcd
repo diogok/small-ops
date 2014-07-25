@@ -20,9 +20,12 @@ require 'small-setup'
         end
         container.keys.each {|key|
             if container[key] != nil then
-                puts "#{key} = #{container[key]}"
+                if @verbose then
+                    puts "#{key} = #{container[key]}"
+                end
                 http_put("#{@etcd}/v2/keys#{@prefix}#{key}","value=#{URI.encode(container[key])}")
             end
         }
+        puts "-> #{name} : #{container["/#{name}/url"]}"
     }
 
