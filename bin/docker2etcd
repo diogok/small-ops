@@ -13,7 +13,11 @@ require 'small-setup'
         container["/#{name}/name"] = name
         container["/#{name}/port"] = hport
         container["/#{name}/host"] = @host
-        container["/#{name}/url"] = "http://#{@host}:#{hport}"
+        if @as_url then
+            container["/#{name}/url"] = "http://#{@host}/#{name}"
+        else
+            container["/#{name}/url"] = "http://#{@host}:#{hport}"
+        end
         container.keys.each {|key|
             if container[key] != nil then
                 puts "#{key} = #{container[key]}"

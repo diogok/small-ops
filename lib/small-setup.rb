@@ -32,6 +32,9 @@ OptionParser.new do |opts|
   opts.on("-t","--target name","Target a single container") do |t|
       options[:target]=t
   end
+  opts.on("-u","--as_url","Make url as host/name instead of host:port") do |u|
+      options[:as_url]=u
+  end
 end.parse!
 
 
@@ -43,6 +46,7 @@ end.parse!
 @input = options[:input] || false 
 @cmd = options[:cmd] || false
 @target = options[:target] || false
+@as_url = options[:as_url] || false
 
 def http_get(uri)
     JSON.parse(Net::HTTP.get(URI(uri)))
