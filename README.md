@@ -6,9 +6,12 @@ Dead simple "devops" tools, on top of docker, etcd, confd and more.
 
 ## Installation
 
+    apt-get install ruby
     gem install small-ops
 
 ## Tools
+
+In general you can use the HOST env var for the tools, and the ETCD env var.
 
 ### fige
 
@@ -22,8 +25,13 @@ Usage:
 
     fige # will run the fig.yml containers, block on foreground and stop/rm the containers on ctrl+c/kill
     fige -d # will run the fig.yml containers and exit, leaving them running
-    fige --prefix test # will run fig.yml, insert "prefix\_" on the names and the env the prefix on the "env"
+    fige --prefix test # will run fig.yml, insert "test\_" on the names and the env the prefix on the "env"
     fige -t name # will run only the one named "name"
+    fige -h 192.168.50.10 # will use this as host
+
+You can combine the parameters.
+
+It will also insert HOST and ETCD into the container env.
 
 ### docker2etcd
 
@@ -31,8 +39,11 @@ Register running containers to etcd, and an additional host and port, useful for
 
 Usage:
 
-    docker2etcd # or
-    docker2etcd --host localhost --etcd localhost:4001 --prefix 
+    docker2etcd # register containers URLs as HOST:PORT
+    docker2etcd -u # register containers URLs as HOST/name
+    docker2etcd --host localhost 
+    docker2etcd --etcd localhost:4001  
+    docker2etcd --host localhost --etcd localhost:4001 -u 
   
 All args are optional, default to machine ip (hostname -I | awk '{print $1}') as host and etcd on port 4001, prefix will put the containers on said prefix on etcd.
 
@@ -47,7 +58,7 @@ All args are optional, prefix is prefix key on etcd, etcd is the server.
 
 ### etcd2conf
 
-Inspired by [confd](), but again simplified, as it just gets the data from etcd, pass in a specified erb template and write the new conf file, forever on each change (unless told otherwise).
+Inspired by [confd](https://github.com/kelseyhightower/confd), but again simplified, as it just gets the data from etcd, pass in a specified erb template and write the new conf file, forever on each change (unless told otherwise).
 
 Usage:
 
