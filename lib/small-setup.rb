@@ -41,7 +41,13 @@ OptionParser.new do |opts|
 end.parse!
 
 @host = options[:host] || ENV['HOST'] || `hostname -I | awk '{ print $1 }'`.gsub("\n","")
-@etcd = options[:etcd] || "http://#{ENV["ETCD_PORT_4001_TCP_ADDR"]}:#{ENV["ETCD_PORT_4001_TCP_PORT"]}" || ENV['ETCD'] || "http://#{@host}:4001"
+if options[:etcd] then
+    @etcd = options[:etcd] 
+elsif ENV["ETCD_PORT_4001_TCP_ADDR"] then
+    @etcd = "http://#{ENV["ETCD_PORT_4001_TCP_ADDR"]}:#{ENV["ETCD_PORT_4001_TCP_PORT"]}"
+else
+    @etcd = ENV['ETCD'] || "http://#{@host}:4001"
+end
 @prefix = options[:prefix] || ENV['PREFIX'] || ""
 @foreground = !options[:daemon]
 @output = options[:output] || false
