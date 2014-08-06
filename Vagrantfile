@@ -15,6 +15,6 @@ Vagrant.configure("2") do |config|
     d.run "coreos/etcd", name: "etcd", args: "-p 4001:4001 -p 7001:7001"
   end
 
-  config.vm.provision :shell, :inline => "apt-get install ruby curl"
+  config.vm.provision :shell, :inline => "apt-get install ruby curl && gem install rspec"
 end
 

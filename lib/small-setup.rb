@@ -4,58 +4,16 @@ require 'json'
 require 'net/http'
 require 'optparse'
 
-options = {}
-
-OptionParser.new do |opts|
-  opts.banner = "Usage: command [options]"
-  opts.on("-h", "--host host", "Set host IP/domain") do |h|
-    options[:host] = h
-  end
-  opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
-    options[:etcd] = e
-  end
-  opts.on("-p", "--prefix prefix", "Set etcd prefix path") do |p|
-    options[:prefix] = p
-  end
-  opts.on("-d","--daemon","Run in background") do |d|
-    options[:daemon]=d
-  end
-  opts.on("-o","--output file","Output file") do |o|
-    options[:output]=o
-  end
-  opts.on("-i","--input file","Input file") do |o|
-    options[:input]=o
-  end
-  opts.on("-c","--command cmd","A command to execute at certain point") do |c|
-    options[:cmd]=c
-  end
-  opts.on("-t","--target name","Target a single container") do |t|
-      options[:target]=t
-  end
-  opts.on("-u","--as_url","Make url as host/name instead of host:port") do |u|
-      options[:as_url]=u
-  end
-  opts.on("-v","--verbose","verboser") do |v|
-      options[:verbose]=v
-  end
-end.parse!
-
-@host = options[:host] || ENV['HOST'] || `hostname -I | awk '{ print $1 }'`.gsub("\n","")
-if options[:etcd] then
-    @etcd = options[:etcd] 
-elsif ENV["ETCD_PORT_4001_TCP_ADDR"] then
-    @etcd = "http://#{ENV["ETCD_PORT_4001_TCP_ADDR"]}:#{ENV["ETCD_PORT_4001_TCP_PORT"]}"
-else
-    @etcd = ENV['ETCD'] || "http://#{@host}:4001"
+@options = {}
+if !ENV["HOST"] then
+    options[:host] = `hostname -I | awk '{ print $1 }'`.gsub("\n","")
 end
-@prefix = options[:prefix] || ENV['PREFIX'] || ""
-@foreground = !options[:daemon]
-@output = options[:output] || false
-@input = options[:input] || false 
-@cmd = options[:cmd] || false
-@target = options[:target] || false
-@as_url = options[:as_url] || false
-@verbose = options[:verbose] || false
+
+if ENV["ETCD_PORT_4001_TCP_ADDR"] then
+    @options[:etcd] = "http://#{ENV["ETCD_PORT_4001_TCP_ADDR"]}:#{ENV["ETCD_PORT_4001_TCP_PORT"]}"
+else
+    @options[:etcd] = ENV['ETCD'] || "http://#{@options[:host]}:4001"
+end
 
 def http_get(uri)
     JSON.parse(Net::HTTP.get(URI(uri)))

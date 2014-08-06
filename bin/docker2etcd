@@ -2,6 +2,22 @@
 
 require 'small-setup'
 
+OptionParser.new do |opts|
+  opts.banner = "Usage: command [options]"
+  opts.on("-h", "--host host", "Set host IP/domain") do |h|
+      @options[:host] = h
+  end
+  opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
+      @options[:etcd] = e
+  end
+  opts.on("-u","--url","Make container url as host/name instead of host:port") do |u|
+      @options[:url]=u
+  end
+  opts.on("-v","--verbose","verboser") do |v|
+      @options[:verbose]=v
+  end
+end.parse!
+
 `docker ps | tail -n+2 | awk '{ print $1 }'`.split("\n")
     .map  { |id| `docker inspect #{id}` }
     .map  { |inspect| JSON.parse(inspect)[0]}
@@ -12,18 +28,18 @@ require 'small-setup'
         hport = container["/#{name}/networksettings/ports/#{port}/tcp/hostport"]
         container["/#{name}/name"] = name
         container["/#{name}/port"] = hport
-        container["/#{name}/host"] = @host
-        if @as_url then
-            container["/#{name}/url"] = "http://#{@host}/#{name}"
+        container["/#{name}/host"] = @options[:host]
+        if @options[:url] then
+            container["/#{name}/url"] = "http://#{@options[:host]}/#{name}"
         else
-            container["/#{name}/url"] = "http://#{@host}:#{hport}"
+            container["/#{name}/url"] = "http://#{@options[:host]}:#{hport}"
         end
         container.keys.each {|key|
             if container[key] != nil then
-                if @verbose then
+                if @options[:verbose] then
                     puts "#{key} = #{container[key]}"
                 end
-                http_put("#{@etcd}/v2/keys#{@prefix}#{key}","value=#{URI.encode(container[key])}")
+                http_put("#{@options[:etcd]}/v2/keys#{key}","value=#{URI.encode(container[key])}")
             end
         }
         puts "-> #{name} : #{container["/#{name}/url"]}"

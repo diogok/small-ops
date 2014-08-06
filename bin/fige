@@ -3,22 +3,50 @@
 require 'small-setup'
 require 'yaml'
 
-yml = YAML.load_file('fig.yml')
+OptionParser.new do |opts|
+  opts.banner = "Usage: command [options]"
+  opts.on("-h", "--host host", "Set host IP/domain") do |h|
+      @options[:host] = h
+  end
+  opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
+      @options[:etcd] = e
+  end
+  opts.on("-u","--url","Make container url as host/name instead of host:port") do |u|
+      @options[:url]=u
+  end
+  opts.on("-v","--verbose","verboser") do |v|
+      @options[:verbose]=v
+  end
+  opts.on("-c","--command cmd","A command to execute after each run") do |c|
+    @options[:cmd]=c
+  end
+  opts.on("-f","--foreground","Keep running on foregroud. Default is run once and exit.") do |f|
+    @options[:foreground]=f
+  end
+  opts.on("-t","--target name","Target a single container") do |t|
+    @options[:target]=t
+  end
+  opts.on("-i","--input file","Input file") do |i|
+    @options[:input]=i
+  end
+  opts.on("-u","--update","pull container") do |p|
+    @options[:update]=p
+  end
+end.parse!
+
+file = @options[:input] || 'fig.yml'
+yml = YAML.load_file(file)
 
 env = {
-  'HOST'=>@host,
-  'ETCD'=>@etcd
+  'HOST'=>@options[:host],
+  'ETCD'=>@options[:etcd]
 }
 
-if @prefix.length >= 1 then
-    env['PREFIX']=@prefix
-end
-
-@containers=[]
+@options[:containers]=[]
 
 apps=[]
-if @target then
-  apps=yml.keys.select {|k| k == @target}
+if @options[:target] then
+  apps=yml.keys.select {|k| k == @options[:target]}
 else
     apps=yml.keys
 end
@@ -39,10 +67,6 @@ apps.each {|k|
   env.keys.each{ |ke|
     yml[k]['environment'][ke] = env[ke]
   }
-
-  if @prefix.length >= 1 then
-    yml[k]['name'] = "#{@prefix}_#{yml[k]['name']}"
-  end
 
   cmd = "docker run -d "
   cmd << " --name #{yml[k]['name']} "
@@ -77,24 +101,26 @@ apps.each {|k|
     cmd << " #{yml[k]["command"]}  "
   end
 
-  #`docker pull #{yml[k]['image']}`
+  if @options[:update] then
+    `docker pull #{yml[k]['image']} > /dev/null 2>&1`
+  end
 
   cid = `#{cmd}`
-  @containers.push(cid)
+  @options[:containers].push(cid)
   puts "#{yml[k]['name']} = #{cid}"
 
-  if @cmd then
-      puts `#{@cmd}`
+  if @options[:cmd] then
+      puts `#{@options[:cmd]}`
   end
 
 }
 
 puts `docker ps`
 
-if @foreground then
+if @options[:foreground] then
   def stop()
     puts "Stopping..."
-    @containers.each {|cid|
+    @options[:containers].each {|cid|
       puts `docker stop #{cid}`
       puts `docker rm #{cid}`
     }

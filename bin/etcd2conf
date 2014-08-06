@@ -4,7 +4,29 @@ require 'small-setup'
 require 'erb'
 require 'zlib'
 
-if !@input || !@output then
+OptionParser.new do |opts|
+  opts.banner = "Usage: command [options]"
+  opts.on("-h", "--host host", "Set host IP/domain") do |h|
+    @options[:host] = h
+  end
+  opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
+    @options[:etcd] = e
+  end
+  opts.on("-f","--foreground","Keep running on foregroud. Default is run once and exit.") do |f|
+    @options[:foreground]=f
+  end
+  opts.on("-o","--output file","Output file") do |o|
+    @options[:output]=o
+  end
+  opts.on("-i","--input file","Input file") do |o|
+    @options[:input]=o
+  end
+  opts.on("-c","--command cmd","A command to execute after each run") do |c|
+    @options[:cmd]=c
+  end
+end.parse!
+
+if !@options[:input] || !@options[:output] then
   raise "Need input and output!"
 end
 
@@ -13,46 +35,44 @@ class Namespace
     @data=data
     @config=config
   end
-
   def get_binding
     binding
   end
 end
 
-
 run = true
-`bash -c '[[ ! -e #{@output} ]] && touch #{@output}'`
-last = File.read(@output)
+`bash -c '[[ ! -e #{@options[:output]} ]] && touch #{@options[:output]}'`
+last = File.read(@options[:output])
 
 while run do
-  r = http_get("#{@etcd}/v2/keys/#{@prefix}?recursive=true")
+  r = http_get("#{@options[:etcd]}/v2/keys/?recursive=true")
 
   data = nodes2obj(r["node"]["nodes"],"/")
 
-  template = File.read(@input)
+  template = File.read(@options[:input])
 
-  if @prefix.length >= 1 then prefix = "#{prefix}/" end
+  if @options[:prefix].length >= 1 then prefix = "#{prefix}/" end
 
-  ns = Namespace.new(data,{"host"=>@host,"prefix"=>prefix})
+  ns = Namespace.new(data,{"host"=>@options[:host],"prefix"=>prefix})
   result=ERB.new(template).result(ns.get_binding)
 
   actual = Zlib::crc32(result)
 
   if actual != last then
-    puts "Writing #{@output}"
+    puts "Writing #{@options[:output]}"
 
-    File.open(@output, 'w') { |file| file.write(result) }
+    File.open(@options[:output], 'w') { |file| file.write(result) }
 
     last = actual
 
-    if @cmd then
-      puts `#{@cmd}`
+    if @options[:cmd] then
+      puts `#{@options[:cmd]}`
     end
   end
 
   run = false
 
-  if @foreground then
+  if @options[:foreground] then
     sleep 10
     run = true
   end
