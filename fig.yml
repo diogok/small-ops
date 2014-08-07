@@ -1,0 +1,5 @@
+etcd:
+  name: etcd
+  image: coreos/etcd
+  ports:
+    - "4001:4001"

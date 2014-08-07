@@ -5,8 +5,10 @@ require 'net/http'
 require 'optparse'
 
 @options = {}
-if !ENV["HOST"] then
-    options[:host] = `hostname -I | awk '{ print $1 }'`.gsub("\n","")
+if ENV["HOST"] then
+  @options[:host] = ENV["HOST"]
+else
+  @options[:host] = `hostname -I | awk '{ print $1 }'`.gsub("\n","")
 end
 
 if ENV["ETCD_PORT_4001_TCP_ADDR"] then

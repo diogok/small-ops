@@ -13,9 +13,16 @@ Dead simple "devops" tools, on top of docker, etcd, confd and more.
 
 In general you can use the HOST env var for the tools, and the ETCD env var.
 
+General parameters are:
+
+    $ HOST=192.168.0.1 command
+    $ command -h 192.168.0.1 # setup the host as relevant for the command
+    $ ETCD=http://192.168.0.1:4001 command
+    $ command -e http://192.168.0.1:4001 # setup the etcd server as relevant for the command
+
 ### fige
 
-Inspired by [fig](http://orchardup.github.io/fig/), but simpler and more limited, as it is just a "fig run".
+Run docker containers from a yml file, inspired by [fig](http://orchardup.github.io/fig/), but simpler and more limited, as it is just a "fig run".
 
 Follow the same [fig.yml](https://orchardup.github.io/fig/yml.html) format.
 
@@ -23,13 +30,16 @@ It can insert a "prefix" param on the name and env of the containers to run.
 
 Usage:
 
-    fige # will run the fig.yml containers, block on foreground and stop/rm the containers on ctrl+c/kill
-    fige -d # will run the fig.yml containers and exit, leaving them running
-    fige --prefix test # will run fig.yml, insert "test\_" on the names and the env the prefix on the "env"
-    fige -t name # will run only the one named "name"
-    fige -h 192.168.50.10 # will use this as host
+    $ fige # will run the fig.yml containers
 
-You can combine the parameters.
+Parameters:
+
+    -c cmd, --command cmd : run "cmd" after each docker run
+    -f, --foreground : keep fige on foreground and stop containers on exit
+    -t name, --tagert name : only run specified container
+    -i file, --input file : use "file" as yml
+    -u, --update : pull container before run 
+
 
 It will also insert HOST and ETCD into the container env.
 
@@ -39,22 +49,20 @@ Register running containers to etcd, and an additional host and port, useful for
 
 Usage:
 
-    docker2etcd # register containers URLs as HOST:PORT
-    docker2etcd -u # register containers URLs as HOST/name
-    docker2etcd --host localhost 
-    docker2etcd --etcd localhost:4001  
-    docker2etcd --host localhost --etcd localhost:4001 -u 
-  
-All args are optional, default to machine ip (hostname -I | awk '{print $1}') as host and etcd on port 4001, prefix will put the containers on said prefix on etcd.
+    $ docker2etcd # register containers inspection and also URLs as HOST:PORT
+
+Parameters:
+
+    -u, --url : instead of registering URL as HOST:PORT register as HOST/NAME
+    -v, --verbose : print all inserted data
 
 ### etcd2env
 
 Inject the etcd data on the env, as KEY\_SUBKEY=value. Usage:
 
-    eval "$(etcd2env)" # or
-    eval "$(etcd2env --prefix prefix --etcd localhost:4001)"
-
-All args are optional, prefix is prefix key on etcd, etcd is the server.
+  
+    $ etcd2env # print the result
+    $ eval "$(etcd2env)" # eval the etcd data
 
 ### etcd2conf
 
@@ -62,14 +70,14 @@ Inspired by [confd](https://github.com/kelseyhightower/confd), but again simplif
 
 Usage:
 
-    etcd2conf -i nginx.conf.rb -o /etc/nginx/nginx.conf  -c 'nginx -s reload'
+    $ etcd2conf -i nginx.conf.rb -o /etc/nginx/nginx.conf  -c 'nginx -s reload' -f
 
 Arguments:
 
-    -i Input template file
-    -o Output file
-    -d Run once only [optional]
-    -c 'command' Execute 'command' after writting the config file [optional]
+    -i file, --input file : Input template file
+    -o file, --output file : Output file
+    -f, --foreground : Keep runing and watching changes
+    -c 'command', --command 'command' : Execute 'command' after writting the config file
 
 ## License
 

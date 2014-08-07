@@ -11,12 +11,6 @@ OptionParser.new do |opts|
   opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
       @options[:etcd] = e
   end
-  opts.on("-u","--url","Make container url as host/name instead of host:port") do |u|
-      @options[:url]=u
-  end
-  opts.on("-v","--verbose","verboser") do |v|
-      @options[:verbose]=v
-  end
   opts.on("-c","--command cmd","A command to execute after each run") do |c|
     @options[:cmd]=c
   end
