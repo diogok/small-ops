@@ -51,9 +51,7 @@ while run do
 
   template = File.read(@options[:input])
 
-  if @options[:prefix].length >= 1 then prefix = "#{prefix}/" end
-
-  ns = Namespace.new(data,{"host"=>@options[:host],"prefix"=>prefix})
+  ns = Namespace.new(data,{"host"=>@options[:host]})
   result=ERB.new(template).result(ns.get_binding)
 
   actual = Zlib::crc32(result)
