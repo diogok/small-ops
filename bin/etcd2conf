@@ -21,12 +21,15 @@ OptionParser.new do |opts|
   opts.on("-i","--input file","Input file") do |o|
     @options[:input]=o
   end
+  opts.on("-s","--string template","Template as string") do |s|
+    @options[:template] = s
+  end
   opts.on("-c","--command cmd","A command to execute after each run") do |c|
     @options[:cmd]=c
   end
 end.parse!
 
-if !@options[:input] || !@options[:output] then
+if ( !@options[:input] && !@options[:template] ) || !@options[:output] then
   raise "Need input and output!"
 end
 
@@ -49,7 +52,12 @@ while run do
 
   data = nodes2obj(r["node"]["nodes"],"/")
 
-  template = File.read(@options[:input])
+  template = ""
+  if @options[:input] then
+    template = File.read(@options[:input])
+  elsif @options[:template]
+    template = @options[:template]
+  end
 
   ns = Namespace.new(data,{"host"=>@options[:host]})
   result=ERB.new(template).result(ns.get_binding)

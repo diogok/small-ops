@@ -75,6 +75,7 @@ Usage:
 Arguments:
 
     -i file, --input file : Input template file
+    -s template_String, --string template_string : Template as a raw string
     -o file, --output file : Output file
     -f, --foreground : Keep runing and watching changes
     -c 'command', --command 'command' : Execute 'command' after writting the config file
