@@ -83,6 +83,12 @@ apps.each {|k|
     }
   end
 
+  if yml[k].has_key? "env" then
+    yml[k]['env'].each {|e|
+      cmd << " -e \"#{e}\" "
+    }
+  end
+
   if yml[k].has_key? "environment" then
     yml[k]['environment'].keys.each {|ke|
       cmd << " -e \"#{ke}=#{yml[k]['environment'][ke].gsub('"','\"')}\" "

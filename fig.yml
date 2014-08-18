@@ -1,5 +1,29 @@
 etcd:
-  name: etcd
-  image: coreos/etcd
-  ports:
-    - "4001:4001"
+    image: coreos/etcd
+    name: etcd
+    ports:
+       - "4001:4001"
+logstash:
+    image: diogok/logstash
+    name: logstash
+    ports:
+        - 80
+        - 9514
+proxy:
+    image: diogok/proxy-docker
+    name: proxy
+    environment:
+        ROOT_APP: "dockerui"
+    ports:
+        - "80:80"
+    links:
+        - "etcd:etcd"
+dockerui:
+    image: crosbymichael/dockerui
+    name: dockerui
+    env:
+        - "/docker.sock"
+    volumes:
+        - "/var/run/docker.sock:/docker.sock"
+    ports:
+        - "9000"
