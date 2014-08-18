@@ -58,7 +58,7 @@ puts "Logging to #{@options[:logstash]}"
 s = TCPSocket.new @options[:logstash].split(":").first, @options[:logstash].split(":").last
 
 if @options[:foreground] && @options[:input] then
-  `tail -f #{@options[:input]} | bin/log2stash --logstash #{@options[:logstash]}`
+  `tail -f #{@options[:input]} | log2stash --logstash #{@options[:logstash]}`
 elsif @options[:input] then
   `cat #{@options[:input]} | bin/log2stash --logstash #{@options[:logstash]}`
 elsif @options[:message] then
