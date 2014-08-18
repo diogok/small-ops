@@ -50,7 +50,7 @@ def log(m)
   now = DateTime.now.strftime('%b %d %H:%M:%S')
   host = `hostname`.gsub("\n","")
   name = @options[:name] || "default_log"
-  priority = @options[:priorty] || '4'
+  priority = @options[:priority] || '4'
   "<#{priority}>#{now} #{host} #{name}: #{m}"
 end
 
