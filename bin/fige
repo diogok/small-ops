@@ -11,6 +11,9 @@ OptionParser.new do |opts|
   opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
       @options[:etcd] = e
   end
+  opts.on("-d", "--data FOO=BAR,FUZ=BAZ",Array, "Insert data into each env") do |d|
+      @options[:data] = d
+  end
   opts.on("-c","--command cmd","A command to execute after each run") do |c|
     @options[:cmd]=c
   end
@@ -95,6 +98,12 @@ apps.each {|k|
     }
   end
 
+  if @options[:data] then
+    @options[:data].each {|d|
+        cmd << " -e \"#{d}\" "
+    }
+  end
+
   cmd << " -t #{yml[k]['image']} "
 
   if yml[k].has_key? "command" then
@@ -105,6 +114,7 @@ apps.each {|k|
     `docker pull #{yml[k]['image']} > /dev/null 2>&1`
   end
 
+  puts cmd
   cid = `#{cmd}`
   @options[:containers].push(cid)
   puts "#{yml[k]['name']} = #{cid}"
