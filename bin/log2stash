@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+
+require 'small-setup'
+require 'date'
+require 'socket'
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: command [options]"
+  opts.on("-h", "--host host", "Set host IP/domain") do |h|
+    @options[:host] = h
+  end
+  opts.on("-e", "--etcd host:port", "Set etcd host and port") do |e|
+    @options[:etcd] = e
+  end
+  opts.on("-f","--foreground","Keep running on foregroud. Default is run once and exit.") do |f|
+    @options[:foreground]=f
+  end
+  opts.on("-i","--input file","Input file") do |i|
+    @options[:input]=i
+  end
+  opts.on("-l","--logstash host:port", "Logstash tcp HOST:PORT") do |l|
+    @options[:logstash] = l
+  end
+  opts.on("-m","--message message","The message to send") do |m|
+    @options[:message]=m
+  end
+  opts.on("-n","--name name","The program log name") do |n|
+    @options[:name]=n
+  end
+  opts.on("-p","--priority priority","The priority (as syslog) of log") do |p|
+    @options[:priority]=p
+  end
+end.parse!
+
+if @options[:logstash] then
+elsif ENV["LOGSTASH_PORT_9514_TCP_ADDR"] then
+    @options[:logstash] = "#{ENV["LOGSTASH_PORT_9514_TCP_ADDR"]}:#{ENV["LOGSTASH_PORT_9514_TCP_PORT"]}"
+elsif ENV["logstash"] then
+    @options[:logstash] = ENV['logstash'] 
+else
+  begin
+    data = nodes2obj( http_get("#{@options[:etcd]}/v2/keys/?recursive=true")["node"]["nodes"] ,"/")
+    @options[:logstash] = "#{data["logstash"]["networksettings"]["ipaddress"]}:9514"
+  rescue
+    @options[:logstash] = ENV['logstash'] || "#{@options[:host]}:9514"
+  end
+end
+
+def log(m)
+  now = DateTime.now.strftime('%b %d %H:%M:%S')
+  host = `hostname`.gsub("\n","")
+  name = @options[:name] || "default_log"
+  priority = @options[:priorty] || '4'
+  "<#{priority}>#{now} #{host} #{name}: #{m}"
+end
+
+puts "Logging to #{@options[:logstash]}" 
+s = TCPSocket.new @options[:logstash].split(":").first, @options[:logstash].split(":").last
+
+if @options[:foreground] && @options[:input] then
+  `tail -f #{@options[:input]} | bin/log2stash --logstash #{@options[:logstash]}`
+elsif @options[:input] then
+  `cat #{@options[:input]} | bin/log2stash --logstash #{@options[:logstash]}`
+elsif @options[:message] then
+  s.puts log(@options[:message])
+else 
+  ARGF.each_line {|line|
+    s.puts log(line)
+  }
+end
+
+s.close
+
