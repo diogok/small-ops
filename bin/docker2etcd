@@ -16,7 +16,21 @@ OptionParser.new do |opts|
   opts.on("-v","--verbose","verboser") do |v|
       @options[:verbose]=v
   end
+  opts.on("-c","--clear","clear etcd of previous data (only containers data)") do |c|
+      @options[:clear]=c
+  end
 end.parse!
+
+if @options[:clear] then
+  data = nodes2obj( http_get("#{@options[:etcd]}/v2/keys/?recursive=true")["node"]["nodes"] ,"/")
+  data.keys.each {|k|
+    n = data[k]
+    if n.has_key?("host") && n.has_key?("name") && n.has_key?("port") then
+        puts "del #{n["name"]}"
+        http_delete("#{@options[:etcd]}/v2/keys/#{n["name"]}?dir=true&recursive=true")
+    end
+  }
+end
 
 `docker ps | tail -n+2 | awk '{ print $1 }'`.split("\n")
     .map  { |id| `docker inspect #{id}` }

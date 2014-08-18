@@ -41,6 +41,14 @@ def http_put(uri,doc)
     end
 end
 
+def http_delete(uri)
+  uri = URI.parse(uri)
+  http = Net::HTTP.new(uri.host, uri.port)
+  request = Net::HTTP::Delete.new(uri.request_uri)
+  response = http.request(request)
+  JSON.parse(response.body)
+end
+
 def flatten(obj,sub)
     flat={}
     sub=sub.gsub("-","_").downcase

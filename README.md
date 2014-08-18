@@ -54,6 +54,7 @@ Parameters:
 
     -u, --url : instead of registering URL as HOST:PORT register as HOST/NAME
     -v, --verbose : print all inserted data
+    -c, --clear : Clear previous data of docker2etcd
 
 ### etcd2env
 
