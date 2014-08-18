@@ -60,7 +60,7 @@ s = TCPSocket.new @options[:logstash].split(":").first, @options[:logstash].spli
 if @options[:foreground] && @options[:input] then
   `tail -f #{@options[:input]} | log2stash --logstash #{@options[:logstash]}`
 elsif @options[:input] then
-  `cat #{@options[:input]} | bin/log2stash --logstash #{@options[:logstash]}`
+  `cat #{@options[:input]} | log2stash --logstash #{@options[:logstash]}`
 elsif @options[:message] then
   s.puts log(@options[:message])
 else 
