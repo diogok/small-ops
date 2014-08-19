@@ -46,11 +46,14 @@ else
   end
 end
 
+@options[:name] = @options[:name] || "default_log"
+@options[:priority] = @options[:priority] || "6"
+
 def log(m)
   now = DateTime.now.strftime('%b %d %H:%M:%S')
   host = `hostname`.gsub("\n","")
-  name = @options[:name] || "default_log"
-  priority = @options[:priority] || '4'
+  name = @options[:name]
+  priority = @options[:priority]
   "<#{priority}>#{now} #{host} #{name}: #{m}"
 end
 
@@ -58,9 +61,9 @@ puts "Logging to #{@options[:logstash]}"
 s = TCPSocket.new @options[:logstash].split(":").first, @options[:logstash].split(":").last
 
 if @options[:foreground] && @options[:input] then
-  `tail -f #{@options[:input]} | log2stash --logstash #{@options[:logstash]}`
+  `tail -f #{@options[:input]} | log2stash -p #{@options[:priority]} --name #{@options[:name]} --logstash #{@options[:logstash]}`
 elsif @options[:input] then
-  `cat #{@options[:input]} | log2stash --logstash #{@options[:logstash]}`
+  `cat #{@options[:input]} | log2stash -p #{@options[:priority]} --name #{@options[:name]} --logstash #{@options[:logstash]}`
 elsif @options[:message] then
   s.puts log(@options[:message])
 else 

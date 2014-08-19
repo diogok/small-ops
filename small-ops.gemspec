@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
     s.name        = "small-ops"
-    s.version     = "0.0.29"
+    s.version     = "0.0.30"
     s.date        = "2014-07-09"
     s.summary     = "Small Docker ops utils"
     s.description = "Docker, etcd, confd, fig..."
