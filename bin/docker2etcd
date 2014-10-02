@@ -65,7 +65,7 @@ while run do
                     if @options[:verbose] then
                         puts "#{key} = #{container[key]}"
                     end
-                    #http_put("#{@options[:etcd]}/v2/keys#{key}","value=#{URI.encode(container[key])}")
+                    http_put("#{@options[:etcd]}/v2/keys#{key}","value=#{URI.encode(container[key])}")
                 end
             }
             puts "-> #{name} : #{container["/#{name}/url"]}"
