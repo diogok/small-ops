@@ -82,7 +82,7 @@ Arguments:
     -f, --foreground : Keep runing and watching changes
     -c 'command', --command 'command' : Execute 'command' after writting the config file
 
-# log2stash
+### log2stash
 
 Logging to [logstash](http://logstash.net/) via syslog interface.
 
