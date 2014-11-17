@@ -40,6 +40,8 @@ Parameters:
     -i file, --input file : use "file" as yml
     -u, --update : pull container before run 
     -d FOO=BAR,FUZ=BAZ, --data FOO=BAR : insert data into the container env
+    -n, --dry : Does not run commands, only simulate and output
+    -a args, --append args : append args to docker run command
 
 It will also insert HOST and ETCD into the container env.
 

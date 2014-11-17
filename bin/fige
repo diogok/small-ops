@@ -29,6 +29,12 @@ OptionParser.new do |opts|
   opts.on("-u","--update","pull container") do |p|
     @options[:update]=p
   end
+  opts.on("-a","--apend cmd","Append cmd to docker command, before the '-t repo/image'") do |a|
+    @options[:append]=a
+  end
+  opts.on("-n","--dry","Dry run, does no execute only echo commands") do |n|
+    @options[:dry]=true
+  end
 end.parse!
 
 file = @options[:input] || 'fig.yml'
@@ -54,8 +60,10 @@ apps.each {|k|
     yml[k]['name'] = yml[k]['image'].gsub(/[^\/]+\//,'')
   end
 
-  puts `docker stop #{yml[k]['name']} 2> /dev/null`
-  puts `docker rm #{yml[k]['name']} 2> /dev/null`
+  if !@options[:dry] then
+    puts `docker stop #{yml[k]['name']} 2> /dev/null`
+    puts `docker rm #{yml[k]['name']} 2> /dev/null`
+  end
 
   if !yml[k].has_key? "environment" then
     yml[k]['environment'] = {}
@@ -103,6 +111,10 @@ apps.each {|k|
         cmd << " -e \"#{d}\" "
     }
   end
+  
+  if @options[:append] then
+    cmd << @options[:append]
+  end
 
   cmd << " -t #{yml[k]['image']} "
 
@@ -110,14 +122,16 @@ apps.each {|k|
     cmd << " #{yml[k]["command"]}  "
   end
 
-  if @options[:update] then
+  if !@options[:dray] && @options[:update] then
     `docker pull #{yml[k]['image']} > /dev/null 2>&1`
   end
 
   puts cmd
-  cid = `#{cmd}`
-  @options[:containers].push(cid)
-  puts "#{yml[k]['name']} = #{cid}"
+  if !@options[:dry] then
+    cid = `#{cmd}`
+    @options[:containers].push(cid)
+    puts "#{yml[k]['name']} = #{cid}"
+  end
 
   if @options[:cmd] then
       puts `#{@options[:cmd]}`
