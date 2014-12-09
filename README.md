@@ -90,19 +90,19 @@ Logging to [logstash](http://logstash.net/) via syslog interface.
 
 Usage:
 
-  $ log2stash -i file.txt -f
-  $ log2stash -m 'message to log ' 
-  $ cat file | log2stash
-  $ tail -f file | log2stash
+    $ log2stash -i file.txt -f
+    $ log2stash -m 'message to log ' 
+    $ cat file | log2stash
+    $ tail -f file | log2stash
 
 Arguments:
 
-  -i file, --input file : Input file to read and log
-  -f, --foreground : Keep runing (use with file)
-  -l host:port,  --logstash host:port : Host and Port of logstash, default to linked (if docker), to etcd (if available) and to localhost:9514
-  -m message, --message msg : Message to log
-  -n name, --name name : Name of the program (to identify in log)
-  -p pri, --priority pri : Syslog priority of the log
+    -i file, --input file : Input file to read and log
+    -f, --foreground : Keep runing (use with file)
+    -l host:port,  --logstash host:port : Host and Port of logstash, default to linked (if docker), to etcd (if available) and to localhost:9514
+    -m message, --message msg : Message to log
+    -n name, --name name : Name of the program (to identify in log)
+    -p pri, --priority pri : Syslog priority of the log
 
 ## License
 
