@@ -50,8 +50,7 @@ while run do
         .map  { |data| flatten(data,data["Name"]) }
         .each { |container| 
             name = container.keys.first.split("/")[1]
-            port = `docker inspect #{container["/#{name}/id"]} | grep -o '[0-9]\\+/tcp' | head -n1 | grep -o '[0-9]\\+'`.gsub("\n","")
-            hport = container["/#{name}/networksettings/ports/#{port}/tcp/hostport"]
+            hport = container.select {|k,v| k.match(/hostport$/) }.first[1]
             container["/#{name}/name"] = name
             container["/#{name}/port"] = hport
             container["/#{name}/host"] = @options[:host]
