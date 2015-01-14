@@ -106,6 +106,16 @@ apps.each {|k|
     }
   end
 
+  if yml[k].has_key? "hostname" then
+    if @options[:host] then
+      cmd << " --hostname=\"#{@options[:host]}_#{yml[k]["hostname"]}\" "
+    else
+      cmd << " --hostname=\"#{yml[k]["hostname"]}\" "
+    end
+  elsif @options[:host] then
+    cmd << " --hostname=\"#{@options[:host]}_#{yml[k]["name"]}\" "
+  end
+
   if yml[k].has_key? "restart" then
     cmd << " --restart #{yml[k]["restart"]} "
   end

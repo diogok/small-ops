@@ -7,6 +7,7 @@ etcd:
 logstash:
     image: diogok/logstash
     name: logstash
+    hostname: "lelogstash"
     ports:
         - 80
         - 9514
