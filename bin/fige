@@ -106,6 +106,10 @@ apps.each {|k|
     }
   end
 
+  if yml[k].has_key? "restart" then
+    cmd << " --restart #{yml[k]["restart"]} "
+  end
+
   if @options[:data] then
     @options[:data].each {|d|
         cmd << " -e \"#{d}\" "

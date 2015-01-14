@@ -1,6 +1,7 @@
 etcd:
     image: coreos/etcd
     name: etcd
+    restart: "always"
     ports:
        - "4001:4001"
 logstash:
