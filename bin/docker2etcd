@@ -50,7 +50,7 @@ while run do
         .map  { |data| flatten(data,data["Name"]) }
         .each { |container| 
             name = container.keys.first.split("/")[1]
-            hport = container.select {|k,v| k.match(/hostport$/) }.first[1]
+            hport = container.select {|k,v| k.match(/networksettings.*hostport$/) }.first[1]
             container["/#{name}/name"] = name
             container["/#{name}/port"] = hport
             container["/#{name}/host"] = @options[:host]
