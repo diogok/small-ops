@@ -79,7 +79,7 @@ while run do
   run = false
 
   if @options[:foreground] then
-    http_get("#{ @options[:etcd] }/v2/keys/?recursive=true&wait=true")
+    sleep 1
     run = true
   end
 
