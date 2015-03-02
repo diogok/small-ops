@@ -130,13 +130,13 @@ apps.each {|k|
     cmd << @options[:append]
   end
 
-  cmd << " -t #{yml[k]['image']} "
+  cmd << " #{yml[k]['image']} "
 
   if yml[k].has_key? "command" then
     cmd << " #{yml[k]["command"]}  "
   end
 
-  if !@options[:dray] && @options[:update] then
+  if !@options[:dry] && @options[:update] then
     `docker pull #{yml[k]['image']} > /dev/null 2>&1`
   end
 
